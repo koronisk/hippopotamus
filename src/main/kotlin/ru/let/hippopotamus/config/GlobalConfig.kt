@@ -1,6 +1,6 @@
 package ru.let.hippopotamus.config
 
-internal data class GlobalConfig(
+data class GlobalConfig(
     val token: String,
     val guild: String
 )
