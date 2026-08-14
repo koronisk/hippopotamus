@@ -33,6 +33,7 @@ import dev.kord.core.event.message.ReactionRemoveEvent
 import dev.kord.core.event.role.RoleCreateEvent
 import dev.kord.core.event.role.RoleDeleteEvent
 import dev.kord.core.on
+import dev.kord.gateway.ALL
 import dev.kord.gateway.Intent
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
@@ -60,56 +61,50 @@ class Bot(private val config: GlobalConfig) {
         subscribeKord()
 
         kord.login {
-            intents = Intents(
-                Intent.GuildMessages,
-                Intent.MessageContent
-            )
+            intents = Intents.ALL
         }
     }
 
     private fun subscribeKord() {
         kord.on<ReadyEvent> { eventManager.call(this) }
 
-        kord.on<CategoryCreateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<CategoryDeleteEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<CategoryUpdateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
+        kord.on<CategoryCreateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<CategoryDeleteEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<CategoryUpdateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<TextChannelCreateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<TextChannelDeleteEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<TextChannelUpdateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
+        kord.on<TextChannelCreateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<TextChannelDeleteEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<TextChannelUpdateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<VoiceChannelCreateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<VoiceChannelDeleteEvent> { if (channel.guild == botGuild) eventManager.call(this) }
-        kord.on<VoiceChannelUpdateEvent> { if (channel.guild == botGuild) eventManager.call(this) }
+        kord.on<VoiceChannelCreateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<VoiceChannelDeleteEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<VoiceChannelUpdateEvent> { if (channel.guild.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<BanAddEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<BanRemoveEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<EmojisUpdateEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<GuildUpdateEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<BanAddEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<BanRemoveEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<EmojisUpdateEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<GuildUpdateEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<IntegrationCreateEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<IntegrationDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<IntegrationCreateEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<IntegrationDeleteEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<InviteCreateEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<InviteDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<InviteCreateEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
+        kord.on<InviteDeleteEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<MemberJoinEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<MemberLeaveEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<MemberUpdateEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<MemberJoinEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<MemberLeaveEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<MemberUpdateEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
 
         kord.on<MessageCreateEvent> { if (guildId == botGuild.id) eventManager.call(this) }
-        kord.on<MessageDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<MessageBulkDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<MessageUpdateEvent> {
-            val channel = kord.getChannel(channelId)
-            if (botGuild.channels.any { it.id == channel?.id }) eventManager.call(this)
-        }
+        kord.on<MessageDeleteEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
+        kord.on<MessageBulkDeleteEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
+        kord.on<MessageUpdateEvent> { if (botGuild.channels.any { it.id == channelId }) eventManager.call(this) }
         
-        kord.on<ReactionAddEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<ReactionRemoveEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<ReactionAddEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
+        kord.on<ReactionRemoveEvent> { if (guild?.id == botGuild.id) eventManager.call(this) }
 
-        kord.on<RoleCreateEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<RoleDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
-        kord.on<RoleDeleteEvent> { if (guild == botGuild) eventManager.call(this) }
+        kord.on<RoleCreateEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<RoleDeleteEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
+        kord.on<RoleDeleteEvent> { if (guild.id == botGuild.id) eventManager.call(this) }
     }
 }

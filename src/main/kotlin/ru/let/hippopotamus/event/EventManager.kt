@@ -3,40 +3,45 @@ package ru.let.hippopotamus.event
 import dev.kord.core.event.Event
 import ru.let.hippopotamus.plugin.Plugin
 import kotlin.jvm.java
+import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspend
+import kotlin.reflect.jvm.kotlinFunction
 
 internal class EventManager {
     private val listeners: MutableSet<Listener> = mutableSetOf()
 
     fun register(plugin: Plugin) {
-        val clazz = plugin.javaClass
 
-        for (method in clazz.methods) {
+        for (method in plugin.javaClass.methods) {
             if (!method.isAnnotationPresent(EventHandler::class.java))
                 continue
 
-            if (method.parameterCount != 1)
-                throw IllegalArgumentException("${method.name} in ${clazz.name} must have exactly one parameter")
+            val function = method.kotlinFunction
+                ?: throw IllegalArgumentException("Cannot get Kotlin function for ${method.name}")
 
-            val eventType = method.parameterTypes[0]
+            val parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }
 
-            if (!Event::class.java.isAssignableFrom(eventType))
+            if (parameters.size != 1)
+                throw IllegalArgumentException("${method.name} must have exactly one event parameter")
+
+            val eventType = parameters[0].type.classifier as? KClass<*>
+                ?: throw IllegalArgumentException("Cannot determine event type")
+
+            if (!Event::class.java.isAssignableFrom(eventType.java))
                 throw IllegalArgumentException("${method.name} parameter must extend Event")
 
-            method.isAccessible = true
-
             @Suppress("UNCHECKED_CAST")
-            val eventClass = eventType as Class<out Event>
-
-            listeners += Listener(plugin, eventClass, method)
+            listeners += Listener(plugin, eventType.java as Class<out Event>, function)
         }
     }
 
-    fun call(event: Event) {
+    suspend fun call(event: Event) {
         listeners.forEach {
             if (!it.eventType.isAssignableFrom(event.javaClass))
                 return@forEach
 
-            it.method.invoke(it.plugin, event)
+            it.function.callSuspend(it.plugin, event)
         }
     }
 }

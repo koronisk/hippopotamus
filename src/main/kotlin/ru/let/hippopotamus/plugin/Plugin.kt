@@ -6,5 +6,5 @@ open class Plugin {
     lateinit var bot: Bot
         internal set
 
-    open fun onEnable() {}
+    open suspend fun onEnable() {}
 }

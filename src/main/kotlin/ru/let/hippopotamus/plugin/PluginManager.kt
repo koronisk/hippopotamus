@@ -1,5 +1,7 @@
 package ru.let.hippopotamus.plugin
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.yaml.snakeyaml.Yaml
 import ru.let.hippopotamus.Bot
 import java.io.File
@@ -9,10 +11,10 @@ import java.util.jar.JarFile
 internal class PluginManager(private val bot: Bot) {
     private val plugins: MutableSet<LoadedPlugin> = mutableSetOf()
 
-    fun loadPlugins() {
-        val folder = File("plugins/config")
+    suspend fun loadPlugins() {
+        val folder = File("plugins")
 
-        if (!folder.exists())
+        if (!File("plugins/config").exists())
             folder.mkdirs()
 
         val files = folder.listFiles()
@@ -29,13 +31,17 @@ internal class PluginManager(private val bot: Bot) {
         }
     }
 
-    private fun loadPlugin(file: File) {
-        val jar = JarFile(file)
+    private suspend fun loadPlugin(file: File) {
+        val jar = withContext(Dispatchers.IO) {
+            JarFile(file)
+        }
 
         val pluginYml = jar.getJarEntry("plugin.yml")
             ?: throw IllegalStateException("${file.name} doesn't contain plugin.yml")
 
-        val metadata = jar.getInputStream(pluginYml).use { readMetadata(it) }
+        val metadata = withContext(Dispatchers.IO) {
+            jar.getInputStream(pluginYml)
+        }.use { readMetadata(it) }
         val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), javaClass.classLoader)
         val pluginClass = classLoader.loadClass(metadata.main)
 
