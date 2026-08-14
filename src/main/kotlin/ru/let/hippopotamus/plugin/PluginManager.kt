@@ -6,11 +6,11 @@ import java.io.File
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 
-class PluginManager(private val bot: Bot) {
+internal class PluginManager(private val bot: Bot) {
     private val plugins: MutableSet<LoadedPlugin> = mutableSetOf()
 
     fun loadPlugins() {
-        val folder = File("plugins")
+        val folder = File("plugins/config")
 
         if (!folder.exists())
             folder.mkdirs()

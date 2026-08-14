@@ -4,8 +4,7 @@ import dev.kord.core.event.Event
 import ru.let.hippopotamus.plugin.Plugin
 import kotlin.jvm.java
 
-class EventManager {
-
+internal class EventManager {
     private val listeners: MutableSet<Listener> = mutableSetOf()
 
     fun register(plugin: Plugin) {

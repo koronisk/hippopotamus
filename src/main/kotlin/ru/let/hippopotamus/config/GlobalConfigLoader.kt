@@ -6,7 +6,7 @@ import java.io.File
 import kotlin.system.exitProcess
 
 
-class GlobalConfigLoader {
+internal class GlobalConfigLoader {
     fun loadOrExit(): GlobalConfig {
         val mapper = jacksonObjectMapper()
 
