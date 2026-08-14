@@ -54,7 +54,7 @@ class Bot(private val config: GlobalConfig) {
     @OptIn(PrivilegedIntent::class)
     suspend fun start() {
         kord = Kord(config.token)
-        botGuild = kord.getGuild(Snowflake(config.guild.toULong()))
+        botGuild = kord.getGuild(Snowflake(config.guild))
 
         pluginManager.loadPlugins()
         subscribeKord()
